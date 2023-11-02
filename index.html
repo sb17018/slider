@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beat Chuck</title>
+    <style>
+      body {
+        position: relative;
+      }
+      .time-moves-displays,
+      .results-displays {
+        font-size: 30px;
+        font-weight: bold;
+        display: inline;
+      }
+      .results-displays {
+        font-size: 15px;
+      }
+      #counterDown {
+        position: absolute;
+        top: 0;
+        left: 0;
+        text-align: center;
+      }
+      #counterDownNumber {
+        margin: 0;
+        color: white;
+        opacity: 0.5;
+        transition: opacity 0.5s;
+      }
+      #counterDownNumber.counter-down-number-fading {
+        opacity: 0;
+      }
+      .slider {
+        width: 100px;
+        height: 100px;
+        margin-top: -4px;
+        display: inline-block;
+        background-color: rgb(16, 210, 162);
+        position: relative;
+        clip-path: inset(0 0 0 0);
+      }
+      [data-empty=true] {
+        box-shadow: inset 0 0 5px black;
+      }
+      img {
+        position: absolute;
+      }
+      .img-to-shift:hover {
+        opacity: 0.8;
+        cursor: pointer;
+      }
+      .last-image {
+        opacity: 1;
+        transition: opacity 1s;
+      }
+      .faded-out-image {
+        opacity: 0;
+      }
+      .to-fade-in-image {
+        opacity: 0;
+        transition: opacity 2s;
+      }
+      .faded-in-image {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tilePlacement"></div>
+    <div id="counterDown"><h1 id="counterDownNumber"></h1></div>
+    <div>
+      <p class="time-moves-displays">Czas:</p>
+      <output class="time-moves-displays" data-time="0">00:00:00:00</output>
+    </div>
+    <div>
+      <p class="time-moves-displays">Liczba ruchów:</p>
+      <output class="time-moves-displays" data-moves="0">00</output>
+    </div>
+    <br />
+    <hr />
+    <h3>Wyniki:</h3>
+    <div>
+      <p class="results-displays">1. Chuck Norris:</p>
+      <p class="results-displays">Czas: 00:00:00:01</p>
+      <p class="results-displays">Liczba ruchów: 01</p>
+    </div>
+    <script>
+      const NUMBER_COLUMN = 4;
+      const tiles = [];
+      const images = [];
+
+      function counterDownNumber() {
+        let counterDownNumber = document.querySelector("#counterDownNumber");
+        let counterDown = counterDownNumber.parentElement;
+        counterDownNumber.style.width = NUMBER_COLUMN * 100 + "px";
+        counterDownNumber.style.fontSize = NUMBER_COLUMN * 100 + "px";
+        counterDownNumber.style.lineHeight = NUMBER_COLUMN * 100 + "px";
+        let count = 5;
+        counterDownNumber.textContent = count;
+        counterDownNumber.addEventListener("transitionend", function () {
+          this.textContent = --count;
+          this.classList.remove("counter-down-number-fading");
+        });
+        const countDown = setInterval(() => {
+          counterDownNumber.classList.add("counter-down-number-fading");
+          if (count == 1) {
+            clearInterval(countDown);
+            counterDown.remove();
+          }
+        }, 1000);
+      }
+
+      function removeTransparencyFromImages() {
+        images.forEach((img) => img.classList.remove("img-to-shift"));
+      }
+
+      function addTransparencyToImages() {
+        [...images].forEach(function (img, ind) {
+          if (ind != images.length - 1) {
+            img.classList.add("img-to-shift");
+          }
+        });
+      }
+
+      const TILES_SEQUENCE_MATRIX = [];
+      const TILES_SEQUENCE_SHUFFLED = [];
+
+      function createMainField() {
+        let tilePlacement = document.querySelector("#tilePlacement");
+        let arrayToMatrix;
+        let sequence = 0;
+        tilePlacement.style.width = NUMBER_COLUMN * 100 + "px";
+        for (let i = 1; i <= NUMBER_COLUMN; i++) {
+          arrayToMatrix = [];
+          for (let j = 1; j <= NUMBER_COLUMN; j++) {
+            let aTile = document.createElement("div");
+            aTile.classList.add("slider");
+            aTile.setAttribute("data-column", j);
+            aTile.setAttribute("data-row", i);
+            aTile.setAttribute("data-sequence", ++sequence);
+            tilePlacement.appendChild(aTile);
+            tiles.push(aTile);
+            if (i == NUMBER_COLUMN && j == NUMBER_COLUMN) {
+              arrayToMatrix.push(null);
+            } else {
+              arrayToMatrix.push(sequence);
+            }
+          }
+          TILES_SEQUENCE_MATRIX.push(arrayToMatrix);
+        }
+        createImages();
+      }
+
+      function completeLastTile() {
+        let image = document.createElement("img");
+        image.src = "img/nabo.jpg";
+        image.style.width = NUMBER_COLUMN * 100 + "px";
+        image.setAttribute("data-sequence", Math.pow(NUMBER_COLUMN, 2));
+        image.style.top = "-" + (NUMBER_COLUMN - 1) * 100 + "px";
+        image.style.left = "-" + (NUMBER_COLUMN - 1) * 100 + "px";
+        image.classList.add("to-fade-in-image");
+        tiles[Math.pow(NUMBER_COLUMN, 2) - 1].appendChild(image);
+        tiles[Math.pow(NUMBER_COLUMN, 2) - 1].removeAttribute("data-empty");
+        setTimeout(() => image.classList.add("faded-in-image"), 500);
+      }
+
+      function checkSequence() {
+        let tileSequence = [...document.querySelectorAll(".slider")];
+        let tileSeq;
+        let imgSeq;
+        for (let i = 0; i < tileSequence.length - 1; i++) {
+          tileSeq = tileSequence[i].getAttribute("data-sequence");
+          try {
+            imgSeq =
+              tileSequence[i].firstElementChild.getAttribute("data-sequence");
+          } catch (err) {
+            break;
+          }
+          if (tileSeq != imgSeq) {
+            break;
+          }
+        }
+        if (tileSeq == imgSeq) {
+          clearInterval(timer);
+          completeLastTile();
+          removeTransparencyFromImages();
+        }
+      }
+
+      const timerPlaceholder = document.querySelectorAll("output");
+
+      let timer;
+
+      function startTimer() {
+        timer = setInterval(() => {
+          let timems = document
+            .querySelector("[data-time]")
+            .getAttribute("data-time");
+          let nextMs = parseInt(timems) + 1;
+          let ms = nextMs % 100 < 10 ? "0" + (nextMs % 100) : nextMs % 100;
+          let sec =
+            parseInt(nextMs / 100) % 60 < 10
+              ? "0" + (parseInt(nextMs / 100) % 60)
+              : parseInt(nextMs / 100) % 60;
+          let min =
+            parseInt(parseInt(nextMs / 100) / 60) % 60 < 10
+              ? "0" + (parseInt(parseInt(nextMs / 100) / 60) % 60)
+              : parseInt(parseInt(nextMs / 100) / 60) % 60;
+          let hour =
+            parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60) < 10
+              ? "0" + parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60)
+              : parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
+          timerPlaceholder[0].textContent =
+            hour + ":" + min + ":" + sec + ":" + ms;
+          document
+            .querySelector("[data-time]")
+            .setAttribute("data-time", nextMs);
+        }, 10);
+      }
+
+      function countMoves() {
+        let moves = document
+          .querySelector("[data-moves]")
+          .getAttribute("data-moves");
+        let nextMove = parseInt(moves) + 1;
+        timerPlaceholder[1].textContent =
+          nextMove < 10 ? "0" + nextMove : nextMove;
+        document
+          .querySelector("[data-moves]")
+          .setAttribute("data-moves", nextMove);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        createMainField();
+        counterDownNumber();
+      });
+
+      function createImages() {
+        let positionTop = 0;
+        let positionLeft = 0;
+        for (i = 0; i < tiles.length; i++) {
+          let image = document.createElement("img");
+          image.src = "img/nabo.jpg";
+          image.style.width = NUMBER_COLUMN * 100 + "px";
+          image.setAttribute("data-sequence", i + 1);
+          image.style.top = positionTop + "px";
+          image.style.left = positionLeft + "px";
+          image.addEventListener("click", (ev) => movePiece(ev.target, false));
+          tiles[i].append(image);
+          images.push(image);
+          positionLeft -= 100;
+          if ((i + 1) % NUMBER_COLUMN == 0) {
+            positionTop -= 100;
+            positionLeft = 0;
+          }
+        }
+        setTimeout(() => {
+          fadeOutLastTile();
+          addTransparencyToImages();
+          shuffleTiles();
+        }, 5000);
+      }
+
+      function fadeOutLastTile() {
+        let lastTile = tiles[tiles.length - 1];
+        lastTile.firstElementChild.classList.add("last-image");
+        lastTile.firstElementChild.addEventListener(
+          "transitionend",
+          function () {
+            lastTile.removeChild(lastTile.firstElementChild);
+            startTimer();
+          }
+        );
+        lastTile.firstElementChild.classList.add("faded-out-image");
+      }
+
+      function shuffleTiles() {
+        shuffleSequence();
+        let a = [];
+        tiles.forEach((t) => a.push(t.getAttribute("data-sequence")));
+        let im = [];
+        images.forEach((ig) => im.push(ig.getAttribute("data-sequence")));
+        for (i = 0; i < tiles.length; i++) {
+          if (TILES_SEQUENCE_SHUFFLED[i] == null) {
+            tiles[i].setAttribute("data-empty", true);
+            continue;
+          }
+          let shuffledNumber = TILES_SEQUENCE_SHUFFLED[i] - 1;
+          if (shuffledNumber == tiles.length - 1) {
+            images[shuffledNumber].classList.remove("faded-out-image");
+          }
+          tiles[i].appendChild(images[shuffledNumber]);
+        }
+      }
+
+      function shuffleSequence() {
+        let emptyTileColumn = NUMBER_COLUMN - 1;
+        let emptyTileRow = NUMBER_COLUMN - 1;
+        for (let i = 0; i < Math.pow(NUMBER_COLUMN, 5); i++) {
+          let empTile = TILES_SEQUENCE_MATRIX[emptyTileColumn][emptyTileRow];
+          let tiletoMove;
+          let tiletoMoveCoords;
+          let tileAboveEmptyColumn = emptyTileColumn;
+          let tileAboveEmptyRow =
+            emptyTileRow - 1 < 0 ? null : emptyTileRow - 1;
+          let tileBelowEmptyColumn = emptyTileColumn;
+          let tileBelowEmptyRow =
+            emptyTileRow + 1 < NUMBER_COLUMN ? emptyTileRow + 1 : null;
+          let tileLeftEmptyColumn =
+            emptyTileColumn - 1 < 0 ? null : emptyTileColumn - 1;
+          let tileLeftEmptyRow = emptyTileRow;
+          let tileRightEmptyColumn =
+            emptyTileColumn + 1 < NUMBER_COLUMN ? emptyTileColumn + 1 : null;
+          let tileRightEmptyRow = emptyTileRow;
+          let tilesAroundEmpty = [
+            [tileAboveEmptyColumn, tileAboveEmptyRow],
+            [tileBelowEmptyColumn, tileBelowEmptyRow],
+            [tileLeftEmptyColumn, tileLeftEmptyRow],
+            [tileRightEmptyColumn, tileRightEmptyRow],
+          ];
+          do {
+            tileToMoveCoords = tilesAroundEmpty[Math.floor(Math.random() * 4)];
+          } while (tileToMoveCoords[0] == null || tileToMoveCoords[1] == null);
+          tileToMove =
+            TILES_SEQUENCE_MATRIX[tileToMoveCoords[0]][tileToMoveCoords[1]];
+          TILES_SEQUENCE_MATRIX[emptyTileColumn][emptyTileRow] = tileToMove;
+          TILES_SEQUENCE_MATRIX[tileToMoveCoords[0]][tileToMoveCoords[1]] =
+            null;
+          emptyTileColumn = tileToMoveCoords[0];
+          emptyTileRow = tileToMoveCoords[1];
+        }
+        TILES_SEQUENCE_MATRIX.forEach((innerArray) => {
+          innerArray.forEach((val) => TILES_SEQUENCE_SHUFFLED.push(val));
+        });
+      }
+
+      function setEmpty(currentEmptyElem, toBeEmptyElem) {
+        currentEmptyElem.removeAttribute("data-empty");
+        toBeEmptyElem.setAttribute("data-empty", true);
+      }
+
+      function tilesAroundClickedImage(clickedImage) {
+        let clickedColumn =
+          clickedImage.parentElement.getAttribute("data-column");
+        let clickedRow = clickedImage.parentElement.getAttribute("data-row");
+        let upClicked = document.querySelector(
+          "[data-column='" +
+            clickedColumn +
+            "'][data-row='" +
+            (clickedRow - 1) +
+            "']"
+        );
+        let downClicked = document.querySelector(
+          "[data-column='" +
+            clickedColumn +
+            "'][data-row='" +
+            (parseInt(clickedRow) + 1) +
+            "']"
+        );
+        let leftClicked = document.querySelector(
+          "[data-column='" +
+            (clickedColumn - 1) +
+            "'][data-row='" +
+            clickedRow +
+            "']"
+        );
+        let rightClicked = document.querySelector(
+          "[data-column='" +
+            (parseInt(clickedColumn) + 1) +
+            "'][data-row='" +
+            clickedRow +
+            "']"
+        );
+        return [upClicked, downClicked, leftClicked, rightClicked];
+      }
+
+      function getEmptyTile(tilesAroundClickedOne) {
+        let tileToReturn = null;
+        tilesAroundClickedOne.forEach((tile) => {
+          if (tile != null) {
+            if (tile.getAttribute("data-empty") == "true") {
+              tileToReturn = tile;
+            }
+          }
+        });
+        return tileToReturn;
+      }
+
+      function movePiece(clickedImage, isShuffling) {
+        let tilesAroundClickedOne = tilesAroundClickedImage(clickedImage);
+        let emptyTile = getEmptyTile(tilesAroundClickedOne);
+        if (emptyTile != null) {
+          setEmpty(emptyTile, clickedImage.parentElement);
+          emptyTile.appendChild(clickedImage);
+          if (!isShuffling) {
+            countMoves();
+            checkSequence();
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
