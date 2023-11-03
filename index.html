@@ -192,22 +192,26 @@
       const timerPlaceholder = document.querySelectorAll("output");
 
       let timer;
-
+      
+      let clicked = false;
       function startTimer() {
-        let nextMs = 0;
-        timer = setInterval(() => {
-          let ms = nextMs % 100;
-          let msNota = ms < 10 ? "0" + ms : ms;
-          let sec = parseInt(nextMs / 100) % 60;
-          let secNota = sec < 10 ? "0" + sec : sec;
-          let min = parseInt(parseInt(nextMs / 100) / 60) % 60;
-          let minNota = min < 10 ? "0" + min : min;
-          let hour = parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
-          let hourNota = hour < 10 ? "0" + hour : hour;
-          timerPlaceholder[0].textContent =
-            hourNota + ":" + minNota + ":" + secNota + ":" + msNota;
-          nextMs++;
-        }, 10);
+        if(!clicked){
+          clicked = true;
+          let nextMs = 0;
+          timer = setInterval(() => {
+            let ms = nextMs % 100;
+            let msNota = ms < 10 ? "0" + ms : ms;
+            let sec = parseInt(nextMs / 100) % 60;
+            let secNota = sec < 10 ? "0" + sec : sec;
+            let min = parseInt(parseInt(nextMs / 100) / 60) % 60;
+            let minNota = min < 10 ? "0" + min : min;
+            let hour = parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
+            let hourNota = hour < 10 ? "0" + hour : hour;
+            timerPlaceholder[0].textContent =
+              hourNota + ":" + minNota + ":" + secNota + ":" + msNota;
+            nextMs++;
+          }, 10);
+        }
       }
 
       function countMoves() {
