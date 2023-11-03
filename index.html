@@ -76,7 +76,7 @@
     </div>
     <div>
       <p class="time-moves-displays">Liczba ruchów:</p>
-      <output class="time-moves-displays" data-moves="0">00</output>
+      <output class="time-moves-displays">00</output>
     </div>
     <br />
     <hr />
@@ -214,16 +214,10 @@
         }
       }
 
+      let moves = 0;
       function countMoves() {
-        let moves = document
-          .querySelector("[data-moves]")
-          .getAttribute("data-moves");
-        let nextMove = parseInt(moves) + 1;
-        timerPlaceholder[1].textContent =
-          nextMove < 10 ? "0" + nextMove : nextMove;
-        document
-          .querySelector("[data-moves]")
-          .setAttribute("data-moves", nextMove);
+        moves++;
+        timerPlaceholder[1].textContent = moves < 10 ? "0" + moves : moves;
       }
 
       document.addEventListener("DOMContentLoaded", () => {
