@@ -41,7 +41,7 @@
         position: relative;
         clip-path: inset(0 0 0 0);
       }
-      [data-empty=true] {
+      [data-empty="true"] {
         box-shadow: inset 0 0 5px black;
       }
       img {
@@ -196,21 +196,16 @@
       function startTimer() {
         let nextMs = 0;
         timer = setInterval(() => {
-          let ms = nextMs % 100 < 10 ? "0" + (nextMs % 100) : nextMs % 100;
-          let sec =
-            parseInt(nextMs / 100) % 60 < 10
-              ? "0" + (parseInt(nextMs / 100) % 60)
-              : parseInt(nextMs / 100) % 60;
-          let min =
-            parseInt(parseInt(nextMs / 100) / 60) % 60 < 10
-              ? "0" + (parseInt(parseInt(nextMs / 100) / 60) % 60)
-              : parseInt(parseInt(nextMs / 100) / 60) % 60;
-          let hour =
-            parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60) < 10
-              ? "0" + parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60)
-              : parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
+          let ms = nextMs % 100;
+          let msNota = ms < 10 ? "0" + ms : ms;
+          let sec = parseInt(nextMs / 100) % 60;
+          let secNota = sec < 10 ? "0" + sec : sec;
+          let min = parseInt(parseInt(nextMs / 100) / 60) % 60;
+          let minNota = min < 10 ? "0" + min : min;
+          let hour = parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
+          let hourNota = hour < 10 ? "0" + hour : hour;
           timerPlaceholder[0].textContent =
-            hour + ":" + min + ":" + sec + ":" + ms;
+            hourNota + ":" + minNota + ":" + secNota + ":" + msNota;
           nextMs++;
         }, 10);
       }
