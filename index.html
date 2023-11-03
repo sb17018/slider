@@ -72,7 +72,7 @@
     <div id="counterDown"><h1 id="counterDownNumber"></h1></div>
     <div>
       <p class="time-moves-displays">Czas:</p>
-      <output class="time-moves-displays" data-time="0">00:00:00:00</output>
+      <output class="time-moves-displays">00:00:00:00</output>
     </div>
     <div>
       <p class="time-moves-displays">Liczba ruchów:</p>
@@ -82,7 +82,7 @@
     <hr />
     <h3>Wyniki:</h3>
     <div>
-      <p class="results-displays">1. Chuck Norris:</p>
+      <p class="results-displays">1. Chuckus Norris:</p>
       <p class="results-displays">Czas: 00:00:00:01</p>
       <p class="results-displays">Liczba ruchów: 01</p>
     </div>
@@ -194,11 +194,8 @@
       let timer;
 
       function startTimer() {
+        let nextMs = 0;
         timer = setInterval(() => {
-          let timems = document
-            .querySelector("[data-time]")
-            .getAttribute("data-time");
-          let nextMs = parseInt(timems) + 1;
           let ms = nextMs % 100 < 10 ? "0" + (nextMs % 100) : nextMs % 100;
           let sec =
             parseInt(nextMs / 100) % 60 < 10
@@ -214,9 +211,7 @@
               : parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
           timerPlaceholder[0].textContent =
             hour + ":" + min + ":" + sec + ":" + ms;
-          document
-            .querySelector("[data-time]")
-            .setAttribute("data-time", nextMs);
+          nextMs++;
         }, 10);
       }
 
