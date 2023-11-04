@@ -1,6 +1,92 @@
-const NUMBER_COLUMN = 4;
+function makeDummyName(random) {
+    if (random) {
+        let firstName = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        let lastName = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        let firstNameLength = Math.floor(Math.random() * 6) + 3;
+        let lastNameLength = Math.floor(Math.random() * 6) + 3;
+        for (let i = 0; i < firstNameLength; i++) {
+            console.log(firstName);
+            firstName += String.fromCharCode(97 + Math.floor(Math.random() * 26));
+        };
+        for (let i = 0; i < lastNameLength; i++) {
+            lastName += String.fromCharCode(97 + Math.floor(Math.random() * 26));
+        };
+        return firstName + " " + lastName;
+    }
+    else if (!random) {
+        return playerNamePlaceholder.textContent;
+    }
+    else {
+        return "Joe Doe";
+    }
+}
+
+
+const NUMBER_COLUMN = 2;
 const tiles = [];
 const images = [];
+
+const usernameField = document.querySelector("#username");
+const nameConfirmBtn = document.querySelector("#nameConfirmBtn");
+const gameStartBtn = document.querySelector("#gameStartBtn");
+const playerNamePlaceholder = document.querySelector("#playerNamePlaceholder");
+usernameField.addEventListener("keyup", function () {
+    console.log(this.value);
+    if (this.value == "") {
+        deactivateNameConfirmBtn();
+        deactivateGameStartBtn();
+    }
+    else {
+        activateNameConfirmBtn();
+    }
+    playerNamePlaceholder.textContent = this.value;
+});
+
+function activateNameConfirmBtn() {
+    nameConfirmBtn.classList.add("active");
+    nameConfirmBtn.addEventListener("click", activateGameStartBtn);
+}
+
+function deactivateNameConfirmBtn() {
+    nameConfirmBtn.classList.remove("active");
+    nameConfirmBtn.removeEventListener("click", activateGameStartBtn);
+
+}
+
+function activateGameStartBtn() {
+    gameStartBtn.classList.add("active");
+    gameStartBtn.addEventListener("click", setFunctionForStartGameBtn);
+
+}
+
+function deactivateGameStartBtn() {
+    gameStartBtn.classList.remove("active");
+    gameStartBtn.removeEventListener("click", setFunctionForStartGameBtn);
+}
+
+function setFunctionForStartGameBtn() {
+    document.querySelector("#userNameSetting").style.display = "none";
+    document.querySelector("#progressDisplay").style.display = "block";
+    counterDownNumber();
+    setTimeout(() => {
+        fadeOutLastTile();
+        addTransparencyToImages();
+        shuffleTiles();
+    }, 5000);
+}
+
+function saveResult(time, moves) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            // console.log(this.responseText);
+            document.querySelector("#results").innerHTML = this.responseText;
+        }
+    };
+    xhttp.open("POST", "./php/write-file.php", true);
+    xhttp.setRequestHeader("content-type", "application/x-www-form-urlencoded");
+    xhttp.send("playerName=" + makeDummyName(false) + "&time=" + time + "&moves=" + moves);
+}
 
 function counterDownNumber() {
     let counterDownNumber = document.querySelector("#counterDownNumber");
@@ -97,30 +183,31 @@ function checkSequence() {
         clearInterval(timer);
         completeLastTile();
         removeTransparencyFromImages();
+        document.querySelector("#resultsDisplay").style.display = "block";
+        saveResult(nextCentsec - 1, moves);
     }
 }
 
-const timerPlaceholder = document.querySelectorAll("output");
-
 let timer;
 
+let nextCentsec;
 let clicked = false;
 function startTimer() {
     if (!clicked) {
         clicked = true;
-        let nextMs = 0;
+        nextCentsec = 0;
         timer = setInterval(() => {
-            let ms = nextMs % 100;
-            let msNota = ms < 10 ? "0" + ms : ms;
-            let sec = parseInt(nextMs / 100) % 60;
+            let centsec = nextCentsec % 100;
+            let centsecNota = centsec < 10 ? "0" + centsec : centsec;
+            let sec = parseInt(nextCentsec / 100) % 60;
             let secNota = sec < 10 ? "0" + sec : sec;
-            let min = parseInt(parseInt(nextMs / 100) / 60) % 60;
+            let min = parseInt(parseInt(nextCentsec / 100) / 60) % 60;
             let minNota = min < 10 ? "0" + min : min;
-            let hour = parseInt(parseInt(parseInt(nextMs / 100) / 60) / 60);
+            let hour = parseInt(parseInt(parseInt(nextCentsec / 100) / 60) / 60);
             let hourNota = hour < 10 ? "0" + hour : hour;
-            timerPlaceholder[0].textContent =
-                hourNota + ":" + minNota + ":" + secNota + ":" + msNota;
-            nextMs++;
+            document.querySelector("#timePlaceholder").textContent =
+                hourNota + ":" + minNota + ":" + secNota + ":" + centsecNota;
+            nextCentsec++;
         }, 10);
     }
 }
@@ -128,12 +215,12 @@ function startTimer() {
 let moves = 0;
 function countMoves() {
     moves++;
-    timerPlaceholder[1].textContent = moves < 10 ? "0" + moves : moves;
+    document.querySelector("#movesPlaceholder").textContent = moves < 10 ? "0" + moves : moves;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     createMainField();
-    counterDownNumber();
+    // counterDownNumber();
 });
 
 function createImages() {
@@ -155,11 +242,6 @@ function createImages() {
             positionLeft = 0;
         }
     }
-    setTimeout(() => {
-        fadeOutLastTile();
-        addTransparencyToImages();
-        shuffleTiles();
-    }, 5000);
 }
 
 function fadeOutLastTile() {
