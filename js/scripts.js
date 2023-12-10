@@ -14,7 +14,7 @@ function makeDummyName(random) {
         return firstName + " " + lastName;
     }
     else if (!random) {
-        return playerNamePlaceholder.textContent;
+        return PLAYER_NAME_PLACEHOLDER.textContent;
     }
     else {
         return "Joe Doe";
@@ -23,14 +23,15 @@ function makeDummyName(random) {
 
 
 const NUMBER_COLUMN = 2;
-const tiles = [];
-const images = [];
+const TILES = [];
+const IMAGES = [];
 
-const usernameField = document.querySelector("#username");
-const nameConfirmBtn = document.querySelector("#nameConfirmBtn");
-const gameStartBtn = document.querySelector("#gameStartBtn");
-const playerNamePlaceholder = document.querySelector("#playerNamePlaceholder");
-usernameField.addEventListener("keyup", function () {
+const USER_NAME_FIELD = document.querySelector("#username");
+const NAME_CONFIRM_BTN = document.querySelector("#nameConfirmBtn");
+const GAME_START_BTN = document.querySelector("#gameStartBtn");
+const PLAYER_NAME_PLACEHOLDER = document.querySelector("#playerNamePlaceholder");
+
+USER_NAME_FIELD.addEventListener("keyup", function () {
     console.log(this.value);
     if (this.value == "") {
         deactivateNameConfirmBtn();
@@ -39,29 +40,29 @@ usernameField.addEventListener("keyup", function () {
     else {
         activateNameConfirmBtn();
     }
-    playerNamePlaceholder.textContent = this.value;
+    PLAYER_NAME_PLACEHOLDER.textContent = this.value;
 });
 
 function activateNameConfirmBtn() {
-    nameConfirmBtn.classList.add("active");
-    nameConfirmBtn.addEventListener("click", activateGameStartBtn);
+    NAME_CONFIRM_BTN.classList.add("active");
+    NAME_CONFIRM_BTN.addEventListener("click", activateGameStartBtn);
 }
 
 function deactivateNameConfirmBtn() {
-    nameConfirmBtn.classList.remove("active");
-    nameConfirmBtn.removeEventListener("click", activateGameStartBtn);
+    NAME_CONFIRM_BTN.classList.remove("active");
+    NAME_CONFIRM_BTN.removeEventListener("click", activateGameStartBtn);
 
 }
 
 function activateGameStartBtn() {
-    gameStartBtn.classList.add("active");
-    gameStartBtn.addEventListener("click", setFunctionForStartGameBtn);
+    GAME_START_BTN.classList.add("active");
+    GAME_START_BTN.addEventListener("click", setFunctionForStartGameBtn);
 
 }
 
 function deactivateGameStartBtn() {
-    gameStartBtn.classList.remove("active");
-    gameStartBtn.removeEventListener("click", setFunctionForStartGameBtn);
+    GAME_START_BTN.classList.remove("active");
+    GAME_START_BTN.removeEventListener("click", setFunctionForStartGameBtn);
 }
 
 function setFunctionForStartGameBtn() {
@@ -91,31 +92,34 @@ function saveResult(time, moves) {
 function counterDownNumber() {
     let counterDownNumber = document.querySelector("#counterDownNumber");
     let counterDown = counterDownNumber.parentElement;
-    counterDownNumber.style.width = NUMBER_COLUMN * 100 + "px";
-    counterDownNumber.style.fontSize = NUMBER_COLUMN * 100 + "px";
-    counterDownNumber.style.lineHeight = NUMBER_COLUMN * 100 + "px";
+    counterDownNumber.style.width = TILE_PLACEMENT_WIDTH + "px";
+    counterDownNumber.style.fontSize = TILE_PLACEMENT_WIDTH + "px";
+    counterDownNumber.style.lineHeight = TILE_PLACEMENT_WIDTH + "px";
     let count = 5;
     counterDownNumber.textContent = count;
-    counterDownNumber.addEventListener("transitionend", function () {
+    setInterval(() => {
+        counterDownNumber.classList.add("counter-down-number-fading")
+    }, 500);
+    counterDownNumber.addEventListener("animationend", function () {
         this.textContent = --count;
         this.classList.remove("counter-down-number-fading");
     });
-    const countDown = setInterval(() => {
+    const COUNT_DOWN = setInterval(() => {
         counterDownNumber.classList.add("counter-down-number-fading");
         if (count == 1) {
-            clearInterval(countDown);
+            clearInterval(COUNT_DOWN);
             counterDown.remove();
         }
     }, 1000);
 }
 
 function removeTransparencyFromImages() {
-    images.forEach((img) => img.classList.remove("img-to-shift"));
+    IMAGES.forEach((img) => img.classList.remove("img-to-shift"));
 }
 
 function addTransparencyToImages() {
-    [...images].forEach(function (img, ind) {
-        if (ind != images.length - 1) {
+    [...IMAGES].forEach(function (img, ind) {
+        if (ind != IMAGES.length - 1) {
             img.classList.add("img-to-shift");
         }
     });
@@ -124,21 +128,29 @@ function addTransparencyToImages() {
 const TILES_SEQUENCE_MATRIX = [];
 const TILES_SEQUENCE_SHUFFLED = [];
 
+const TILE_PLACEMENT = document.querySelector("#tilePlacement");
+const CSS_OBJ = window.getComputedStyle(TILE_PLACEMENT, null);
+const TILE_PLACEMENT_WIDTH = parseInt(CSS_OBJ.getPropertyValue("width"));
+console.log(TILE_PLACEMENT_WIDTH);
+
 function createMainField() {
-    let tilePlacement = document.querySelector("#tilePlacement");
+    const SLIDER_WIDTH = TILE_PLACEMENT_WIDTH / NUMBER_COLUMN;
+    const SLIDER_HEIGHT = TILE_PLACEMENT_WIDTH / NUMBER_COLUMN;
     let arrayToMatrix;
     let sequence = 0;
-    tilePlacement.style.width = NUMBER_COLUMN * 100 + "px";
+    // TILE_PLACEMENT.style.width = NUMBER_COLUMN * 100 + "px";
     for (let i = 1; i <= NUMBER_COLUMN; i++) {
         arrayToMatrix = [];
         for (let j = 1; j <= NUMBER_COLUMN; j++) {
             let aTile = document.createElement("div");
             aTile.classList.add("slider");
+            aTile.style.width = SLIDER_WIDTH + "px";
+            aTile.style.height = SLIDER_HEIGHT + "px";
             aTile.setAttribute("data-column", j);
             aTile.setAttribute("data-row", i);
             aTile.setAttribute("data-sequence", ++sequence);
-            tilePlacement.appendChild(aTile);
-            tiles.push(aTile);
+            TILE_PLACEMENT.appendChild(aTile);
+            TILES.push(aTile);
             if (i == NUMBER_COLUMN && j == NUMBER_COLUMN) {
                 arrayToMatrix.push(null);
             } else {
@@ -153,13 +165,13 @@ function createMainField() {
 function completeLastTile() {
     let image = document.createElement("img");
     image.src = "img/nabo.jpg";
-    image.style.width = NUMBER_COLUMN * 100 + "px";
+    image.style.width = TILE_PLACEMENT_WIDTH + "px";
     image.setAttribute("data-sequence", Math.pow(NUMBER_COLUMN, 2));
-    image.style.top = "-" + (NUMBER_COLUMN - 1) * 100 + "px";
-    image.style.left = "-" + (NUMBER_COLUMN - 1) * 100 + "px";
+    image.style.top = "-" + (NUMBER_COLUMN - 1) * (TILE_PLACEMENT_WIDTH / NUMBER_COLUMN) + "px";
+    image.style.left = "-" + (NUMBER_COLUMN - 1) * (TILE_PLACEMENT_WIDTH / NUMBER_COLUMN) + "px";
     image.classList.add("to-fade-in-image");
-    tiles[Math.pow(NUMBER_COLUMN, 2) - 1].appendChild(image);
-    tiles[Math.pow(NUMBER_COLUMN, 2) - 1].removeAttribute("data-empty");
+    TILES[Math.pow(NUMBER_COLUMN, 2) - 1].appendChild(image);
+    TILES[Math.pow(NUMBER_COLUMN, 2) - 1].removeAttribute("data-empty");
     setTimeout(() => image.classList.add("faded-in-image"), 500);
 }
 
@@ -226,26 +238,26 @@ document.addEventListener("DOMContentLoaded", () => {
 function createImages() {
     let positionTop = 0;
     let positionLeft = 0;
-    for (i = 0; i < tiles.length; i++) {
+    for (i = 0; i < TILES.length; i++) {
         let image = document.createElement("img");
         image.src = "img/nabo.jpg";
-        image.style.width = NUMBER_COLUMN * 100 + "px";
+        image.style.width = TILE_PLACEMENT_WIDTH + "px";
         image.setAttribute("data-sequence", i + 1);
         image.style.top = positionTop + "px";
         image.style.left = positionLeft + "px";
         image.addEventListener("click", (ev) => movePiece(ev.target, false));
-        tiles[i].append(image);
-        images.push(image);
-        positionLeft -= 100;
+        TILES[i].append(image);
+        IMAGES.push(image);
+        positionLeft -= (TILE_PLACEMENT_WIDTH / NUMBER_COLUMN);
         if ((i + 1) % NUMBER_COLUMN == 0) {
-            positionTop -= 100;
+            positionTop -= (TILE_PLACEMENT_WIDTH / NUMBER_COLUMN);
             positionLeft = 0;
         }
     }
 }
 
 function fadeOutLastTile() {
-    let lastTile = tiles[tiles.length - 1];
+    let lastTile = TILES[TILES.length - 1];
     lastTile.firstElementChild.classList.add("last-image");
     lastTile.firstElementChild.addEventListener(
         "transitionend",
@@ -260,19 +272,19 @@ function fadeOutLastTile() {
 function shuffleTiles() {
     shuffleSequence();
     let a = [];
-    tiles.forEach((t) => a.push(t.getAttribute("data-sequence")));
+    TILES.forEach((t) => a.push(t.getAttribute("data-sequence")));
     let im = [];
-    images.forEach((ig) => im.push(ig.getAttribute("data-sequence")));
-    for (i = 0; i < tiles.length; i++) {
+    IMAGES.forEach((ig) => im.push(ig.getAttribute("data-sequence")));
+    for (i = 0; i < TILES.length; i++) {
         if (TILES_SEQUENCE_SHUFFLED[i] == null) {
-            tiles[i].setAttribute("data-empty", true);
+            TILES[i].setAttribute("data-empty", true);
             continue;
         }
         let shuffledNumber = TILES_SEQUENCE_SHUFFLED[i] - 1;
-        if (shuffledNumber == tiles.length - 1) {
-            images[shuffledNumber].classList.remove("faded-out-image");
+        if (shuffledNumber == TILES.length - 1) {
+            IMAGES[shuffledNumber].classList.remove("faded-out-image");
         }
-        tiles[i].appendChild(images[shuffledNumber]);
+        TILES[i].appendChild(IMAGES[shuffledNumber]);
     }
 }
 
