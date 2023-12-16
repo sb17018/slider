@@ -53,11 +53,11 @@ tr.my-result {
 #counterDownNumber {
   margin: 0;
   color: white;
-  opacity: 0.5;
+  opacity: 0;
 }
 
 #counterDownNumber.counter-down-number-fading {
-  animation: fade-out 500ms;
+  animation: fade-out 5000ms;
   animation-fill-mode: both;
   -moz-animation: fade-out 500ms;
   -moz-animation-fill-mode: both;
@@ -66,7 +66,7 @@ tr.my-result {
 }
 
 @keyframes fade-out {
-  0% {
+  80% {
     opacity: .5;
   }
 
@@ -76,6 +76,8 @@ tr.my-result {
 }
 
 .slider {
+  width: fit-content;
+  height: fit-content;
   margin-top: -8px;
   display: inline-block;
   background-color: rgb(16, 210, 162);
@@ -142,9 +144,16 @@ img {
   background-color: rgb(138, 119, 13);
   color: rgb(236, 223, 144);
 }
+
 #playerName{
-  display: block;
+  display: none;
 }
+
+#playerName.full{
+  display: block;
+  height: fit-content;
+}
+
 #progressDisplay, #resultsDisplay {
   display: none;
 }
